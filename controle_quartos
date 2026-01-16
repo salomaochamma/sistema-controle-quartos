@@ -1,0 +1,135 @@
+from flask import Flask, render_template, request, redirect, url_for
+from flask_socketio import SocketIO, emit
+import oracledb
+
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# --- CONFIGURAÇÃO DO ORACLE ---
+USER = "rm564765"       # Coloque seu usuário
+PASSWORD = "070401"     # Coloque sua senha
+DSN = "oracle.fiap.com.br:1521/orcl" 
+
+def get_db_connection():
+    try:
+        conn = oracledb.connect(user=USER, password=PASSWORD, dsn=DSN)
+        return conn
+    except Exception as e:
+        print(f"Erro ao conectar: {e}")
+        return None
+
+@app.route('/')
+def index():
+    conn = get_db_connection()
+    if not conn:
+        return "Erro de conexão com o banco de dados."
+    
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT numero, status, hospedes, horario_cafe, observacao FROM quartos ORDER BY numero')
+    dados = cursor.fetchall()
+    
+    quartos = []
+    contagem = {'ocupados': 0, 'saiu': 0, 'disponiveis': 0, 'limpeza': 0}
+    
+    for linha in dados:
+        status_db = linha[1].lower() if linha[1] else 'disponivel'
+        status_css = status_db.replace('í', 'i').replace('ç', 'c').replace('ã', 'a')
+        
+        quartos.append({
+            'numero': linha[0],
+            'status': status_css,
+            'hospedes': linha[2] if linha[2] else 0,
+            'horario_cafe': linha[3],
+            'observacao': linha[4]
+        })
+        
+        if 'ocupado' in status_css: contagem['ocupados'] += 1
+        elif 'saiu' in status_css: contagem['saiu'] += 1
+        elif 'disponivel' in status_css: contagem['disponiveis'] += 1
+        elif 'limpeza' in status_css: contagem['limpeza'] += 1
+
+    cursor.close()
+    conn.close()
+    
+    return render_template('index.html', quartos=quartos, resumo=contagem)
+
+@app.route('/atualizar_status/<numero>', methods=['POST'])
+def atualizar_status(numero):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT status FROM quartos WHERE numero = :1", [numero])
+    resultado = cursor.fetchone()
+    if not resultado:
+        return 'Quarto não encontrado', 404
+        
+    status_atual = resultado[0].lower()
+    ciclo = {
+        'disponivel': 'ocupado',
+        'ocupado': 'saiu',
+        'saiu': 'limpeza',
+        'limpeza': 'disponivel'
+    }
+    chave_busca = status_atual.replace('í', 'i').replace('ç', 'c').replace('ã', 'a')
+    novo_status = ciclo.get(chave_busca, 'disponivel')
+    
+    cursor.execute("UPDATE quartos SET status = :1 WHERE numero = :2", [novo_status, numero])
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    socketio.emit('quarto_atualizado', {
+        'numero': numero,
+        'status': novo_status,
+        'tipo': 'status_rapido'
+    },)
+
+    return '', 204
+
+@app.route('/salvar_detalhes', methods=['POST'])
+def salvar_detalhes():
+    numero = request.form.get('numero')
+    hospedes = request.form.get('hospedes')
+    cafe = request.form.get('cafe')
+    obs = request.form.get('obs')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        UPDATE quartos 
+        SET hospedes = :1, horario_cafe = :2, observacao = :3 
+        WHERE numero = :4
+    """, [hospedes, cafe, obs, numero])
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    socketio.emit('quarto_atualizado', {
+        'numero': numero,
+        'hospedes': hospedes,
+        'cafe': cafe,
+        'obs': obs,
+        'tipo': 'detalhes'
+        },)
+    
+    return '', 204
+
+@app.route('/resetar', methods=['POST'])
+def resetar():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Zera tudo no banco
+    cursor.execute("UPDATE quartos SET status = 'disponivel', hospedes = 0, horario_cafe = NULL, observacao = NULL")
+    conn.commit()
+    cursor.close() 
+    conn.close()
+
+    # O SEGREDO: Avisa todo mundo que o reset aconteceu
+    socketio.emit('reset_geral') 
+    
+    return '', 204  # Sucesso, sem recarregar
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)

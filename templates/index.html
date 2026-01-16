@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pousada Cantareira - Controle</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/static.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+
+    <div class="header">
+    <h2>Controle de Quartos</h2>
+    <div class="resumo-container">
+        <span class="dot ocupado"></span> 
+        <span id="cnt-ocupados">{{ resumo.ocupados }}</span> Ocup 
+        
+        <span class="separador">·</span>
+
+        <span class="dot saiu"></span> 
+        <span id="cnt-saiu">{{ resumo.saiu }}</span> Saiu 
+        
+        <span class="separador">·</span>
+
+        <span class="dot disponivel"></span> 
+        <span id="cnt-disponiveis">{{ resumo.disponiveis }}</span> Disp 
+        
+        <span class="separador">·</span>
+
+        <span class="dot limpeza"></span> 
+        <span id="cnt-limpeza">{{ resumo.limpeza }}</span> Limp
+    </div>
+</div>
+
+    <div class="grid-container">
+        {% for quarto in quartos %}
+        <div class="card {{ quarto.status }}" 
+             data-quarto="{{ quarto.numero }}" 
+             data-obs="{{ quarto.observacao }}">
+            
+            <div class="info-superior">
+                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">person</span>
+                <span class="val-hospedes">{{ quarto.hospedes }}</span>
+            </div>
+            
+            {% if quarto.observacao %}
+            <div class="alerta-obs" title="{{ quarto.observacao }}">!</div>
+            {% endif %}
+
+            <div class="quarto-numero">{{ quarto.numero }}</div>
+            
+            <div class="cafe-horario {{ 'vazio' if not quarto.horario_cafe }}">
+                {% if quarto.horario_cafe %}
+                    café: {{ quarto.horario_cafe }}
+                {% else %}
+                    &nbsp; {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="text-align: center; margin-top: 25px;">
+    <button type="button" class="btn-reset" onclick="resetarTudo()">Resetar</button>
+    </div>
+
+    <div id="modal-overlay" onclick="fecharTudo()"></div>
+
+    <div id="modal-edicao">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title" id="titulo-quarto">Quarto --</h3>
+                <small id="subtitulo-status" style="color:#666;">Status Atual</small>
+            </div>
+            <button class="btn-close" type="button" onclick="fecharTudo()">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+
+        <div id="status-display" class="status-display">--</div>
+
+        <form id="form-edicao" action="/salvar_detalhes" method="POST">
+            <input type="hidden" name="numero" id="input-numero">
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label class="input-label">Horário do Café:</label>
+                    <input type="text" name="cafe" id="display-cafe" class="fake-input" 
+                           readonly onclick="abrirTeclado('cafe')" placeholder="--:--">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Hóspedes:</label>
+                    <input type="text" name="hospedes" id="display-hospedes" class="fake-input" 
+                           readonly onclick="abrirTeclado('hospedes')" placeholder="0">
+                </div>
+            </div>
+
+            <label class="input-label" style="margin-top: 10px;">Observações:</label>
+            <textarea name="obs" id="input-obs" class="btn-obs" rows="2" placeholder="Adicionar observação..."></textarea>
+
+            <button type="submit" class="btn-salvar-modal">Salvar Alterações</button>
+        </form>
+    </div>
+
+    <div id="teclado-numerico">
+        <div class="teclado-header">
+            <div class="teclado-label" id="teclado-contexto">HORÁRIO DO CAFÉ</div>
+            <div class="teclado-visor" id="teclado-visor-valor">--:--</div>
+        </div>
+
+        <div class="teclado-grid">
+            <button class="key-btn" type="button" onclick="digitar('1')">1</button>
+            <button class="key-btn" type="button" onclick="digitar('2')">2</button>
+            <button class="key-btn" type="button" onclick="digitar('3')">3</button>
+            
+            <button class="key-btn" type="button" onclick="digitar('4')">4</button>
+            <button class="key-btn" type="button" onclick="digitar('5')">5</button>
+            <button class="key-btn" type="button" onclick="digitar('6')">6</button>
+            
+            <button class="key-btn" type="button" onclick="digitar('7')">7</button>
+            <button class="key-btn" type="button" onclick="digitar('8')">8</button>
+            <button class="key-btn" type="button" onclick="digitar('9')">9</button>
+            
+            <button class="key-btn" type="button" style="color:#27AE60" onclick="fecharTeclado()">
+                <span class="material-icons">check</span>
+            </button>
+            <button class="key-btn" type="button" onclick="digitar('0')">0</button>
+            <button class="key-btn" type="button" style="color:#EB5757" onclick="apagarDigito()">
+                <span class="material-icons">backspace</span>
+            </button>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='javascript/script.js') }}"></script>
+</body>
+</html>
+

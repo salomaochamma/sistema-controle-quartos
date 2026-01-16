@@ -1,0 +1,328 @@
+:root {
+    --disponivel: #27AE60; --ocupado: #EB5757;
+    --limpeza: #F2C94C;    --saiu: #2D9CDB;
+}
+
+/* Ajuste global para "travar" a tela e centralizar tudo */
+html, body { 
+    font-family: 'Segoe UI', sans-serif; 
+    background-color: #f4f4f4; 
+    margin: 0; 
+    padding: 20px 0; /* Mantém um respiro nas bordas */
+    
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;      /* Centraliza na horizontal (esquerda/direita) */
+    justify-content: center;  /* NOVO: Centraliza na vertical (cima/baixo) */
+    
+    width: 100%; 
+    height: 100vh;            /* NOVO: Força a altura ser exatamente a da tela */
+    overflow: hidden;         /* NOVO: Esconde a barra de rolagem e bloqueia o scroll */
+    
+    box-sizing: border-box;
+    overscroll-behavior: none; /* NOVO: Evita o efeito "elástico" ao tentar arrastar no iPhone */
+}
+
+button, .key-btn, .card {
+    touch-action: manipulation;
+}
+
+.header { width: 100%; text-align: center; margin-bottom: 25px; }
+
+/* --- ESTILOS DAS BOLINHAS DO RESUMO --- */
+.resumo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px; 
+    font-weight: 500;
+    color: #555;
+    flex-wrap: wrap; 
+    margin-top: 10px;
+}
+
+.dot {
+    height: 12px;
+    width: 12px;
+    border-radius: 50%; 
+    display: inline-block;
+}
+
+.separador {
+    font-weight: bold;
+    margin: 0 8px; 
+    color: #ccc;
+}
+
+.dot.ocupado { background-color: var(--ocupado); }
+.dot.saiu { background-color: var(--saiu); }
+.dot.disponivel { background-color: var(--disponivel); }
+.dot.limpeza { background-color: var(--limpeza); }
+/* --- FIM DO NOVO BLOCO --- */
+
+.grid-container {
+    display: grid; 
+    grid-template-columns: repeat(3, minmax(110px, 1fr));
+    gap: 15px; 
+    width: fit-content ;
+    max-width: 400px; 
+    margin: 0 auto;
+    padding: 0% 10px;
+    justify-content: center;
+}
+
+.card {
+    width: 100%;
+    aspect-ratio: 1 / 1; 
+    border-radius: 15px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    align-items: center;
+    color: white; 
+    position: relative; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-decoration: none; 
+    padding: 12px 8px; 
+    box-sizing: border-box; 
+    cursor: pointer;
+    
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+.disponivel { background-color: var(--disponivel); }
+.ocupado { background-color: var(--ocupado); }
+.limpeza { background-color: var(--limpeza); }
+.saiu { background-color: var(--saiu); }
+
+.quarto-numero { 
+    font-size: 2.2rem; 
+    font-weight: 700; 
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+.cafe-horario {
+    font-size: 0.75rem; 
+    font-weight: 500;
+    background: rgba(0,0,0,0.15); 
+    padding: 4px 8px;
+    border-radius: 8px; 
+    min-height: 24px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.cafe-horario.vazio {
+    background: transparent;
+    color: transparent;
+}
+
+.info-superior { display: flex; align-items: center; font-size: 0.8rem; min-height: 20px; width: 100%;
+}
+
+.alerta-obs {
+    position: absolute; 
+    top: 8px; 
+    right: 8px;
+    background: #fff; 
+    color: #333; 
+    border-radius: 50%;
+    width: 20px; 
+    height: 20px; 
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+    font-size: 12px;
+}
+
+.btn-reset { 
+    background:#8B3232; 
+    color:white; 
+    border:none; 
+    padding:12px 40px; 
+    border-radius:25px; 
+    cursor:pointer; 
+    font-size: 1rem; 
+    font-weight: bold; 
+    margin-top: 25px;
+}
+
+/* --- MODAL E KEYPAD STYLES --- */
+
+#modal-overlay {
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.5); 
+    z-index: 1000; 
+    backdrop-filter: blur(2px);
+}
+
+#modal-edicao {
+    position: fixed; 
+    bottom: -100%; 
+    left: 0; 
+    width: 100%;
+    background: #F2F2F2; 
+    border-radius: 25px 25px 0 0; 
+    padding: 25px;
+    z-index: 1001; 
+    transition: bottom 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    box-sizing: border-box; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px;
+}
+
+#modal-edicao.active { bottom: 0; }
+#modal-overlay.active { display: block; }
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; }
+.modal-title { font-size: 1.2rem; font-weight: bold; color: #333; margin: 0; }
+.btn-close { font-size: 1.5rem; background: none; border: none; cursor: pointer; color: #555; }
+
+.status-display {
+    width: 100%; 
+    height: 60px; 
+    padding: 0;  
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+    
+    border-radius: 15px;
+    color: white; 
+    font-weight: 800; 
+    font-size: 1.4rem; 
+    text-transform: uppercase; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-sizing: border-box; 
+}
+
+.input-row { display: flex; gap: 15px; width: 100%; }
+.input-group { flex: 1; display: flex; flex-direction: column; }
+.input-label { font-size: 0.9rem; color: #555; margin-bottom: 5px; font-weight: 500; }
+
+.fake-input {
+    background: white; 
+    border-radius: 12px; 
+    padding: 15px;
+    text-align: center; 
+    font-size: 1.2rem; 
+    font-weight: bold; 
+    color: #333;
+    border: 2px solid transparent; 
+    width: 100%; 
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.fake-input.focando { border-color: #27AE60; }
+
+.btn-obs {
+    width: 100%; 
+    box-sizing: border-box; 
+    background: white; 
+    color: #333;
+    padding: 15px; 
+    border-radius: 12px; 
+    border: none;
+    font-size: 1rem; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    font-family: inherit; 
+    resize: none;
+    text-align: center; 
+}
+
+.btn-salvar-modal {
+    width: 100%; 
+    background: #27AE60; 
+    color: white; 
+    border: none;
+    padding: 15px; 
+    border-radius: 15px; 
+    font-weight: bold; 
+    font-size: 1.1rem;
+    margin-top: 5px;
+}
+
+/* --- TECLADO COM VISOR --- */
+#teclado-numerico {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    width: 100%;
+    background: #EAEAEA;
+    border-radius: 25px 25px 0 0;
+    padding: 20px;
+    z-index: 1005;
+    transition: bottom 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+}
+
+#teclado-numerico.active { bottom: 0; }
+
+.teclado-header { text-align: center; padding: 10px 0; }
+.teclado-label { font-size: 0.9rem; color: #666; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+
+.teclado-visor {
+    background: #FFF9C4; 
+    color: #333;
+    font-size: 2rem;
+    font-weight: 800;
+    padding: 10px 40px;
+    border-radius: 50px;
+    display: inline-block;
+    min-width: 150px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.teclado-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.key-btn {
+    background: white;
+    border: none;
+    border-radius: 12px;
+    padding: 18px;
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 3px 0 #ccc;
+    cursor: pointer;
+}
+
+.key-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+    background: #f0f0f0;
+}
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 480px) {
+    body {
+        padding: 10px; /* Reduz um pouco o padding em telas pequenas para ganhar espaço */
+    }
+    .grid-container {
+        gap: 10px;
+    }
+    .header h2 {
+        font-size: 1.5rem;
+    }
+}
