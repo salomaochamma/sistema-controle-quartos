@@ -6,7 +6,7 @@ import psycopg2
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-DATABASE_URL = os.environ.get('postgresql://banco_pousada_user:FJaEupMVI0lF0rlUfIx3IR7F8lhi896r@dpg-d5m4e7kmrvns73et0i0g-a/banco_pousada')
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
 def get_db_connection():
     try:
