@@ -1,24 +1,51 @@
-import os # Import necessário para ler variáveis do sistema
-from flask import Flask, render_template, request, redirect, url_for
+import os
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
-import oracledb
+import psycopg2 
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# --- CONFIGURAÇÃO DO ORACLE ---
-
-USER = os.environ.get('DB_USER', 'rm564765')
-PASSWORD = os.environ.get('DB_PASSWORD', '070401')
-DSN = os.environ.get('DB_DSN', "oracle.fiap.com.br:1521/orcl")
+DATABASE_URL = os.environ.get('postgresql://banco_pousada_user:FJaEupMVI0lF0rlUfIx3IR7F8lhi896r@dpg-d5m4e7kmrvns73et0i0g-a/banco_pousada')
 
 def get_db_connection():
     try:
-        conn = oracledb.connect(user=USER, password=PASSWORD, dsn=DSN)
+        conn = psycopg2.connect(DATABASE_URL)
         return conn
     except Exception as e:
         print(f"Erro ao conectar: {e}")
         return None
+
+def criar_tabela():
+    conn = get_db_connection()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS quartos (
+                numero VARCHAR(10) PRIMARY KEY,
+                status VARCHAR(20),
+                hospedes INT DEFAULT 0,
+                horario_cafe VARCHAR(10),
+                observacao TEXT
+            );
+        """)
+        
+        cursor.execute("SELECT COUNT(*) FROM quartos")
+        if cursor.fetchone()[0] == 0:
+            for i in range(1, 13):
+                num = f"{i:02d}" # Formata 01, 02...
+                cursor.execute("INSERT INTO quartos (numero, status, hospedes) VALUES (%s, 'disponivel', 0)", (num,))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+
+with app.app_context():
+    try:
+        criar_tabela()
+    except:
+        pass 
 
 @app.route('/')
 def index():
@@ -27,7 +54,6 @@ def index():
         return "Erro de conexão com o banco de dados."
     
     cursor = conn.cursor()
-    
     cursor.execute('SELECT numero, status, hospedes, horario_cafe, observacao FROM quartos ORDER BY numero')
     dados = cursor.fetchall()
     
@@ -53,15 +79,15 @@ def index():
 
     cursor.close()
     conn.close()
-    
     return render_template('index.html', quartos=quartos, resumo=contagem)
 
 @app.route('/atualizar_status/<numero>', methods=['POST'])
 def atualizar_status(numero):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT status FROM quartos WHERE numero = :1", [numero])
+    cursor.execute("SELECT status FROM quartos WHERE numero = %s", (numero,))
     resultado = cursor.fetchone()
+    
     if not resultado:
         return 'Quarto não encontrado', 404
         
@@ -73,9 +99,11 @@ def atualizar_status(numero):
         'limpeza': 'disponivel'
     }
     chave_busca = status_atual.replace('í', 'i').replace('ç', 'c').replace('ã', 'a')
+    if chave_busca not in ciclo: chave_busca = 'disponivel' 
+    
     novo_status = ciclo.get(chave_busca, 'disponivel')
     
-    cursor.execute("UPDATE quartos SET status = :1 WHERE numero = :2", [novo_status, numero])
+    cursor.execute("UPDATE quartos SET status = %s WHERE numero = %s", (novo_status, numero))
     conn.commit()
     cursor.close()
     conn.close()
@@ -85,7 +113,6 @@ def atualizar_status(numero):
         'status': novo_status,
         'tipo': 'status_rapido'
     })
-
     return '', 204
 
 @app.route('/salvar_detalhes', methods=['POST'])
@@ -100,9 +127,9 @@ def salvar_detalhes():
     
     cursor.execute("""
         UPDATE quartos 
-        SET hospedes = :1, horario_cafe = :2, observacao = :3 
-        WHERE numero = :4
-    """, [hospedes, cafe, obs, numero])
+        SET hospedes = %s, horario_cafe = %s, observacao = %s 
+        WHERE numero = %s
+    """, (hospedes, cafe, obs, numero))
     
     conn.commit()
     cursor.close()
@@ -115,7 +142,6 @@ def salvar_detalhes():
         'obs': obs,
         'tipo': 'detalhes'
     })
-    
     return '', 204
 
 @app.route('/resetar', methods=['POST'])
@@ -128,8 +154,7 @@ def resetar():
     conn.close()
 
     socketio.emit('reset_geral') 
-    
-    return '', 204 
+    return '', 204
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
