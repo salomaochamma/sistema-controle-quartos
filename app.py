@@ -33,7 +33,7 @@ def criar_tabela():
         cursor.execute("SELECT COUNT(*) FROM quartos")
         if cursor.fetchone()[0] == 0:
             for i in range(1, 13):
-                num = f"{i:02d}" # Formata 01, 02...
+                num = f"{i:02d}" 
                 cursor.execute("INSERT INTO quartos (numero, status, hospedes) VALUES (%s, 'disponivel', 0)", (num,))
         
         conn.commit()
