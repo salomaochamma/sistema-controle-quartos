@@ -8,19 +8,25 @@ html, body {
     font-family: 'Segoe UI', sans-serif; 
     background-color: #f4f4f4; 
     margin: 0; 
-    padding: 20px 0; /* Mantém um respiro nas bordas */
+    
+    /* MUDANÇA 1: Padding embaixo para o botão não ficar colado */
+    padding: 20px 0 50px 0; 
     
     display: flex; 
     flex-direction: column; 
-    align-items: center;      /* Centraliza na horizontal (esquerda/direita) */
-    justify-content: center;  /* NOVO: Centraliza na vertical (cima/baixo) */
+    align-items: center;      
+    justify-content: center;  
     
     width: 100%; 
-    height: 100vh;            /* NOVO: Força a altura ser exatamente a da tela */
-    overflow: hidden;         /* NOVO: Esconde a barra de rolagem e bloqueia o scroll */
+    
+    /* MUDANÇA 2: min-height em vez de height fixa */
+    min-height: 100vh;            
+    
+    /* MUDANÇA 3: Libera o scroll vertical */
+    overflow-y: auto;         
     
     box-sizing: border-box;
-    overscroll-behavior: none; /* NOVO: Evita o efeito "elástico" ao tentar arrastar no iPhone */
+    overscroll-behavior: none; 
 }
 
 button, .key-btn, .card {
