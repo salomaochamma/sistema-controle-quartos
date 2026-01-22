@@ -10,19 +10,19 @@ Sistema desenvolvido para gerenciamento simultâneo de status de quartos de uma 
 
 ![image0](https://github.com/user-attachments/assets/9d78c103-fbc5-4b66-8009-2ce832539bb3)
 
-Tecnologias Utilizadas: 
+## Tecnologias Utilizadas
 
-Back-end: Python, Flask, Flask-SocketIO
-Banco de Dados: Oracle Database (integração via oracledb)
-Front-end: HTML5, CSS e JavaScript
-Comunicação: WebSockets (para sincronização entre dispositivos sem refresh)
+* **Back-end:** Python, Flask, Flask-SocketIO
+* **Banco de Dados:** PostgreSQL (Migrado para produção no Render)
+* **Front-end:** HTML5, CSS3, JavaScript
+* **Infraestrutura:** Render (PaaS)
+* **Comunicação:** WebSockets (Sincronização em tempo real)
 
-Funcionalidades:
+## Funcionalidades
 
-Dashboard em Tempo Real: Atualização instantânea de status (Ocupado, Disponível, Limpeza, Saiu) em todos os dispositivos conectados.
-Mobile First: Interface otimizada para uso em celulares pela equipe de limpeza e recepção.
-Gestão de Detalhes: Controle de horário de café, número de hóspedes e observações.
-Resumo Automático: Contadores de ocupação atualizados dinamicamente.
+* **Dashboard em Tempo Real:** Atualização instantânea de status (Ocupado, Disponível, Limpeza, Saiu) em todos os dispositivos conectados sem att a página.
+* **Mobile First:** Interface otimizada com botões grandes e layout responsivo para uso em celulares pela equipe de limpeza e recepção.
+* **Gestão de Detalhes:** Menu de controle do horário de café, número de hóspedes e observações importantes.
+* **Resumo Automático:** Contadores de ocupação e métricas operacionais atualizados dinamicamente no topo da tela.
 
-Para rodar clone o repositório:
-   git clone [https://github.com/SEU_USUARIO/sistema-controle-quartos.git](https://github.com/SEU_USUARIO/sistema-controle-quartos.git)
+O programa esta sendo utilizado em pratica... link mediante a solicitação :)
