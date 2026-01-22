@@ -1,4 +1,4 @@
-**Sistema de Controle de Quartos em Tempo Real**
+## **Sistema de Controle de Quartos em Tempo Real**
 
 Sistema desenvolvido para gerenciamento simultâneo de status de quartos de uma pousada, com interface focada em mobile para auxiliar colegas de trabalho com a situação geral da pousada com atualizações instantâneas via WebSockets.
 
