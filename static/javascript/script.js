@@ -3,11 +3,8 @@ const socket = io();
 let timer;
 const longPressDuration = 600;
 
-// Variáveis de controle do Teclado Numérico
 let campoAtivo = null; 
 let valorTemp = "";    
-
-// --- EVENTOS DOS CARDS (CLIQUE RÁPIDO E LONGO) ---
 
 document.querySelectorAll('.card').forEach(card => {
 
@@ -30,7 +27,6 @@ document.querySelectorAll('.card').forEach(card => {
             }, longPressDuration);
         }, { passive: false });
     });
-
 
     ['mouseup', 'touchend'].forEach(evt => {
         card.addEventListener(evt, (e) => {
@@ -56,8 +52,6 @@ document.querySelectorAll('.card').forEach(card => {
     });
 });
 
-// --- FUNÇÕES DE COMUNICAÇÃO ---
-
 function alterarStatusRapido(numero) {
     fetch(`/atualizar_status/${numero}`, { method: 'POST' });
 }
@@ -68,22 +62,18 @@ function resetarTudo() {
     }
 }
 
-// --- FUNÇÃO AUXILIAR: ATUALIZA OS CONTADORES DO TOPO ---
 function atualizarContadores() {
-    // Conta quantos cards de cada tipo existem na tela agora
+
     const ocupados = document.querySelectorAll('.card.ocupado').length;
     const saiu = document.querySelectorAll('.card.saiu').length;
     const disponiveis = document.querySelectorAll('.card.disponivel').length;
     const limpeza = document.querySelectorAll('.card.limpeza').length;
 
-    // Atualiza os números no HTML (se os IDs existirem)
     if(document.getElementById('cnt-ocupados')) document.getElementById('cnt-ocupados').innerText = ocupados;
     if(document.getElementById('cnt-saiu')) document.getElementById('cnt-saiu').innerText = saiu;
     if(document.getElementById('cnt-disponiveis')) document.getElementById('cnt-disponiveis').innerText = disponiveis;
     if(document.getElementById('cnt-limpeza')) document.getElementById('cnt-limpeza').innerText = limpeza;
 }
-
-// --- OUVINTES DO SOCKET (Atualizações em Tempo Real) ---
 
 socket.on('quarto_atualizado', function(data) {
     const card = document.querySelector(`.card[data-quarto="${data.numero}"]`);
@@ -93,7 +83,7 @@ socket.on('quarto_atualizado', function(data) {
         card.classList.remove('disponivel', 'ocupado', 'saiu', 'limpeza');
         card.classList.add(data.status);
         
-        // Atualiza a contagem lá no topo imediatamente
+
         atualizarContadores();
     } 
     else if (data.tipo === 'detalhes') {
@@ -140,11 +130,9 @@ socket.on('reset_geral', function() {
         if (alerta) alerta.remove();
     });
     
-    // Atualiza a contagem também no reset
+
     atualizarContadores();
 });
-
-// --- FORMULÁRIO MODAL ---
 
 document.getElementById('form-edicao').onsubmit = function(e) {
     e.preventDefault();
@@ -157,8 +145,6 @@ document.getElementById('form-edicao').onsubmit = function(e) {
         if(res.ok) fecharTudo();
     });
 };
-
-// --- MODAL E HELPERS ---
 
 function abrirMenuEdicao(numero, status, hospedes, cafe, observacao) {
     document.getElementById('titulo-quarto').innerText = "Quarto " + numero;
@@ -180,25 +166,22 @@ function abrirMenuEdicao(numero, status, hospedes, cafe, observacao) {
 }
 
 function fecharTudo() {
-    // 1. Tira o foco para fechar teclado mobile
+
     if (document.activeElement) {
         document.activeElement.blur();
     }
 
-    // 2. Pequeno delay para evitar pulos na tela
     setTimeout(() => {
         document.getElementById('modal-edicao').classList.remove('active');
         document.getElementById('teclado-numerico').classList.remove('active');
         document.getElementById('modal-overlay').classList.remove('active');
         
-        // 3. Força topo da tela
+
         window.scrollTo(0, 0);
         
         campoAtivo = null;
     }, 100);
 }
-
-// --- LÓGICA DO TECLADO NUMÉRICO ---
 
 function abrirTeclado(tipo) {
     campoAtivo = tipo;

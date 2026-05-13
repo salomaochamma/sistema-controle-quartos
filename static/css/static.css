@@ -3,13 +3,12 @@
     --limpeza: #F2C94C;    --saiu: #2D9CDB;
 }
 
-/* Ajuste global para "travar" a tela e centralizar tudo */
 html, body { 
     font-family: 'Segoe UI', sans-serif; 
     background-color: #f4f4f4; 
     margin: 0; 
     
-    /* MUDANÇA 1: Padding embaixo para o botão não ficar colado */
+    
     padding: 20px 0 50px 0; 
     
     display: flex; 
@@ -19,10 +18,10 @@ html, body {
     
     width: 100%; 
     
-    /* MUDANÇA 2: min-height em vez de height fixa */
+    
     min-height: 100vh;            
     
-    /* MUDANÇA 3: Libera o scroll vertical */
+    
     overflow-y: auto;         
     
     box-sizing: border-box;
@@ -35,7 +34,6 @@ button, .key-btn, .card {
 
 .header { width: 100%; text-align: center; margin-bottom: 25px; }
 
-/* --- ESTILOS DAS BOLINHAS DO RESUMO --- */
 .resumo-container {
     display: flex;
     justify-content: center;
@@ -64,7 +62,6 @@ button, .key-btn, .card {
 .dot.saiu { background-color: var(--saiu); }
 .dot.disponivel { background-color: var(--disponivel); }
 .dot.limpeza { background-color: var(--limpeza); }
-/* --- FIM DO NOVO BLOCO --- */
 
 .grid-container {
     display: grid; 
@@ -160,8 +157,6 @@ button, .key-btn, .card {
     font-weight: bold; 
     margin-top: 25px;
 }
-
-/* --- MODAL E KEYPAD STYLES --- */
 
 #modal-overlay {
     display: none; 
@@ -262,7 +257,6 @@ button, .key-btn, .card {
     margin-top: 5px;
 }
 
-/* --- TECLADO COM VISOR --- */
 #teclado-numerico {
     position: fixed;
     bottom: -100%;
@@ -320,10 +314,10 @@ button, .key-btn, .card {
     box-shadow: none;
     background: #f0f0f0;
 }
-/* --- RESPONSIVE DESIGN --- */
+
 @media (max-width: 480px) {
     body {
-        padding: 10px; /* Reduz um pouco o padding em telas pequenas para ganhar espaço */
+        padding: 10px; 
     }
     .grid-container {
         gap: 10px;
